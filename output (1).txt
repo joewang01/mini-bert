@@ -1,0 +1,84 @@
+Loaded 8544 train examples from data/ids-sst-train.csv
+Loaded 1101 dev examples from data/ids-sst-dev.csv
+Loaded 282994 train examples from data/quora-train.csv
+Loaded 40428 dev examples from data/quora-dev.csv
+Loaded 6040 train examples from data/sts-train.csv
+Loaded 863 dev examples from data/sts-dev.csv
+# of parameters to be learned 109487623
+Running multi task
+Using Gradient Surgery
+Batches per task:  {'qqq': 26668, 'sst': 26630, 'sts': 26702}
+Sentiment classification accuracy: 0.490
+Paraphrase detection accuracy: 0.807
+Semantic Textual Similarity correlation: 0.853
+save the model to multitask.pt
+Epoch 0: Avg dev :: 0.741, dev SST acc :: 0.490, dev QQQ acc :: 0.807, dev STS corr :: 0.853
+Epoch 0: SST mean loss :: 0.570, QQQ mean loss :: 0.468, STS mean loss :: 0.570
+Using Gradient Surgery
+Batches per task:  {'qqq': 26642, 'sst': 26595, 'sts': 26763}
+Sentiment classification accuracy: 0.488
+Paraphrase detection accuracy: 0.837
+Semantic Textual Similarity correlation: 0.859
+save the model to multitask.pt
+Epoch 1: Avg dev :: 0.751, dev SST acc :: 0.488, dev QQQ acc :: 0.837, dev STS corr :: 0.859
+Epoch 1: SST mean loss :: 0.157, QQQ mean loss :: 0.387, STS mean loss :: 0.157
+Using Gradient Surgery
+Batches per task:  {'qqq': 26948, 'sst': 26640, 'sts': 26412}
+Sentiment classification accuracy: 0.492
+Paraphrase detection accuracy: 0.829
+Semantic Textual Similarity correlation: 0.861
+Epoch 2: Avg dev :: 0.750, dev SST acc :: 0.492, dev QQQ acc :: 0.829, dev STS corr :: 0.861
+Epoch 2: SST mean loss :: 0.102, QQQ mean loss :: 0.356, STS mean loss :: 0.102
+Using Gradient Surgery
+Batches per task:  {'qqq': 26757, 'sst': 26699, 'sts': 26544}
+Sentiment classification accuracy: 0.471
+Paraphrase detection accuracy: 0.854
+Semantic Textual Similarity correlation: 0.866
+save the model to multitask.pt
+Epoch 3: Avg dev :: 0.753, dev SST acc :: 0.471, dev QQQ acc :: 0.854, dev STS corr :: 0.866
+Epoch 3: SST mean loss :: 0.081, QQQ mean loss :: 0.346, STS mean loss :: 0.081
+Using Gradient Surgery
+Batches per task:  {'qqq': 26741, 'sst': 26639, 'sts': 26620}
+Sentiment classification accuracy: 0.482
+Paraphrase detection accuracy: 0.856
+Semantic Textual Similarity correlation: 0.868
+save the model to multitask.pt
+Epoch 4: Avg dev :: 0.757, dev SST acc :: 0.482, dev QQQ acc :: 0.856, dev STS corr :: 0.868
+Epoch 4: SST mean loss :: 0.066, QQQ mean loss :: 0.332, STS mean loss :: 0.066
+Using Gradient Surgery
+Batches per task:  {'qqq': 26697, 'sst': 26746, 'sts': 26557}
+Sentiment classification accuracy: 0.505
+Paraphrase detection accuracy: 0.864
+Semantic Textual Similarity correlation: 0.870
+save the model to multitask.pt
+Epoch 5: Avg dev :: 0.768, dev SST acc :: 0.505, dev QQQ acc :: 0.864, dev STS corr :: 0.870
+Epoch 5: SST mean loss :: 0.059, QQQ mean loss :: 0.320, STS mean loss :: 0.059
+Using Gradient Surgery
+Batches per task:  {'qqq': 26666, 'sst': 26700, 'sts': 26634}
+Sentiment classification accuracy: 0.491
+Paraphrase detection accuracy: 0.866
+Semantic Textual Similarity correlation: 0.869
+Epoch 6: Avg dev :: 0.764, dev SST acc :: 0.491, dev QQQ acc :: 0.866, dev STS corr :: 0.869
+Epoch 6: SST mean loss :: 0.052, QQQ mean loss :: 0.308, STS mean loss :: 0.052
+Using Gradient Surgery
+Batches per task:  {'qqq': 26666, 'sst': 26613, 'sts': 26721}
+Sentiment classification accuracy: 0.493
+Paraphrase detection accuracy: 0.870
+Semantic Textual Similarity correlation: 0.871
+Epoch 7: Avg dev :: 0.766, dev SST acc :: 0.493, dev QQQ acc :: 0.870, dev STS corr :: 0.871
+Epoch 7: SST mean loss :: 0.047, QQQ mean loss :: 0.306, STS mean loss :: 0.047
+Using Gradient Surgery
+Batches per task:  {'qqq': 26471, 'sst': 26909, 'sts': 26620}
+Sentiment classification accuracy: 0.480
+Paraphrase detection accuracy: 0.872
+Semantic Textual Similarity correlation: 0.873
+Epoch 8: Avg dev :: 0.763, dev SST acc :: 0.480, dev QQQ acc :: 0.872, dev STS corr :: 0.873
+Epoch 8: SST mean loss :: 0.044, QQQ mean loss :: 0.300, STS mean loss :: 0.044
+Using Gradient Surgery
+Batches per task:  {'qqq': 26726, 'sst': 26681, 'sts': 26593}
+Sentiment classification accuracy: 0.490
+Paraphrase detection accuracy: 0.877
+Semantic Textual Similarity correlation: 0.873
+Epoch 9: Avg dev :: 0.768, dev SST acc :: 0.490, dev QQQ acc :: 0.877, dev STS corr :: 0.873
+Epoch 9: SST mean loss :: 0.042, QQQ mean loss :: 0.293, STS mean loss :: 0.042
+Loaded model to test from multitask.pt
