@@ -38,6 +38,12 @@ class DayStats:
     days_to_erase: float
     """How many average winning days one worst-case day wipes out.  The single
     most legible measure of tail asymmetry for this kind of strategy."""
+    traded_frac: float
+    """Fraction of sessions actually traded.  Below 1.0 an entry filter is
+    declining days, and the mean is spread over calendar days rather than
+    traded ones -- skipping costs income as well as risk."""
+    win_rate_traded: float
+    """Wins as a fraction of *traded* sessions, so filters do not flatter it."""
     mean_rolls: float
     roll_day_frac: float
     max_peak_contracts: int
@@ -89,6 +95,8 @@ def summarise(label: str, paths: list, start_equity: float) -> Summary:
     peak_margin = np.concatenate([p.peak_margin for p in paths])
     total_risk = np.concatenate([p.total_risk for p in paths])
 
+
+    traded = np.concatenate([p.total_risk for p in paths]) > 0
     wins, losses = pnl[pnl > 0], pnl[pnl < 0]
     gross_loss = -losses.sum()
     mean_win = wins.mean() if wins.size else 0.0
@@ -115,6 +123,8 @@ def summarise(label: str, paths: list, start_equity: float) -> Summary:
         cvar_5=float(tail_5.mean()) if tail_5.size else 0.0,
         cvar_1=float(tail_1.mean()) if tail_1.size else 0.0,
         days_to_erase=float(-pnl.min() / mean_win) if mean_win > 0 else float("inf"),
+        traded_frac=float(traded.mean()),
+        win_rate_traded=float((pnl[traded] > 0).mean()) if traded.any() else 0.0,
         mean_rolls=float(rolls.mean()),
         roll_day_frac=float((rolls > 0).mean()),
         max_peak_contracts=int(peak_contracts.max()),

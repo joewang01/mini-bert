@@ -55,6 +55,10 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--plot", default=None, help="write the four-panel dashboard here")
     r.add_argument("--sensitivity", action="store_true",
                    help="also sweep execution cost and variance premium")
+    r.add_argument("--filter-study", action="store_true",
+                   help="test whether an entry filter rescues the martingale")
+    r.add_argument("--skip-rate", type=float, default=0.20,
+                   help="fraction of sessions an entry filter declines")
     return p
 
 
@@ -154,6 +158,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.sensitivity:
         _sensitivity(market, costs, account, base, args)
 
+    if args.filter_study:
+        _filter_study(market, costs, account, base, args, progress)
+
     if args.csv:
         with open(args.csv, "w", newline="") as fh:
             rows = [s.row() for s in summaries]
@@ -195,3 +202,92 @@ def _sensitivity(market, costs, account, base, args) -> None:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+_STUDY_COLUMNS = [
+    ("policy", 24, lambda s: s.label, None),
+    ("traded%", 9, lambda s: 100 * s.days.traded_frac, 1),
+    ("$/day", 9, lambda s: s.days.mean, 2),
+    ("win%(t)", 9, lambda s: 100 * s.days.win_rate_traded, 1),
+    ("med yr%", 9, lambda s: 100 * s.paths.median_return, 1),
+    ("p05 yr%", 9, lambda s: 100 * s.paths.p05_return, 1),
+    ("worst day", 11, lambda s: s.days.worst_day, 0),
+    ("CVaR1%", 10, lambda s: s.days.cvar_1, 0),
+    ("maxDD%", 8, lambda s: 100 * s.paths.median_max_drawdown, 1),
+]
+
+
+def _study_table(summaries) -> str:
+    header = "".join(
+        f"{name:<{w}}" if prec is None else f"{name:>{w}}"
+        for name, w, _, prec in _STUDY_COLUMNS
+    )
+    lines = [header, "-" * len(header)]
+    for s in summaries:
+        lines.append(
+            "".join(
+                f"{get(s):<{w}}" if prec is None else f"{get(s):>{w},.{prec}f}"
+                for _, w, get, prec in _STUDY_COLUMNS
+            )
+        )
+    return "\n".join(lines)
+
+
+def _filter_study(market, costs, account, base, args, progress) -> None:
+    """Can skipping the days that look dangerous make a martingale safe?"""
+    from dataclasses import replace
+
+    from .config import FilterConfig
+    from .filter_study import (
+        FilterSpec,
+        calibrate_threshold,
+        run_filter_study,
+        signal_power_sweep,
+    )
+
+    entry_step = market.minute_to_index(base.entry_minute)
+    skip = args.skip_rate
+
+    def spec(label, **kw):
+        filt = FilterConfig(**kw)
+        return FilterSpec(
+            label,
+            replace(filt, threshold=calibrate_threshold(market, filt, entry_step, skip)),
+        )
+
+    specs = [
+        FilterSpec("no filter", FilterConfig()),
+        spec("opening range (realisable)", kind="opening_range"),
+        spec("rvol proxy, corr 0.60", kind="rvol", corr=0.60),
+        spec("rvol proxy, corr 0.90", kind="rvol", corr=0.90),
+        spec("perfect vol oracle", kind="oracle_vol"),
+    ]
+
+    print("\n" + "=" * 92)
+    print(f"Entry filters, each declining {100*skip:.0f}% of sessions, applied to every policy")
+    print("=" * 92)
+    print("Thresholds calibrated on a separate sample. 'win%(t)' counts wins among *traded* days.")
+
+    results = run_filter_study(
+        market, costs, account, base, specs,
+        max(80, args.paths // 3), args.days, args.seed, progress,
+    )
+    for label, summaries in results.items():
+        print(f"\n  {label}")
+        for line in _study_table(summaries).splitlines():
+            print("    " + line)
+
+    print("\n" + "=" * 92)
+    print(f"How predictive must a volume signal be? (all at {100*skip:.0f}% skipped)")
+    print("=" * 92)
+    rows = signal_power_sweep(
+        market, costs, account, base, [0.0, 0.3, 0.6, 0.9, 1.0], skip,
+        entry_step, max(80, args.paths // 3), args.days, args.seed, progress,
+    )
+    print(f"{'corr':>6}{'martingale $/day':>20}{'worst day':>13}"
+          f"{'hard stop $/day':>19}{'worst day':>13}{'gap $/day':>13}")
+    print("-" * 84)
+    for corr, mart, stop in rows:
+        print(f"{corr:>6.2f}{mart.days.mean:>20,.2f}{mart.days.worst_day:>13,.0f}"
+              f"{stop.days.mean:>19,.2f}{stop.days.worst_day:>13,.0f}"
+              f"{mart.days.mean - stop.days.mean:>13,.2f}")

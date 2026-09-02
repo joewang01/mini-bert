@@ -178,7 +178,10 @@ class DaySurface:
     engine indexes them by step and works in scalars from there.
     """
 
-    __slots__ = ("spot_path", "iv_level", "var_left", "cfg", "n_steps")
+    __slots__ = (
+        "spot_path", "iv_level", "var_left", "cfg", "n_steps",
+        "vol_multiple", "vol_z", "signal_noise",
+    )
 
     def __init__(
         self,
@@ -186,12 +189,26 @@ class DaySurface:
         iv_level: np.ndarray,
         var_left: np.ndarray,
         cfg: MarketConfig,
+        vol_multiple: float = 1.0,
+        vol_z: float = 0.0,
+        signal_noise: float = 0.0,
     ) -> None:
         self.spot_path = spot_path
         self.iv_level = iv_level
         self.var_left = var_left
         self.cfg = cfg
         self.n_steps = len(spot_path) - 1
+        self.vol_multiple = vol_multiple
+        """Realised / implied daily vol for this session.  Not observable at
+        entry time -- filters that read it are oracles, useful only as bounds."""
+        self.vol_z = vol_z
+        """``vol_multiple`` as a standard normal score."""
+        self.signal_noise = signal_noise
+        """Independent draw used to build a noisy observation of ``vol_z``.
+
+        Held on the day rather than folded into a signal so that filter quality
+        can be swept without regenerating markets -- the same day yields a
+        correlated family of signals, one per assumed predictive power."""
 
     def spot(self, step: int) -> float:
         return float(self.spot_path[step])
@@ -337,7 +354,13 @@ class MarketSimulator:
 
         var_left = np.clip(1.0 - self._clock, 0.0, 1.0)
 
+        vol_z = np.log(vrp / cfg.vrp_median) / cfg.vrp_log_sd
+        signal_noise = rng.standard_normal(n_days)
+
         return [
-            DaySurface(spot_paths[i], iv_levels[i], var_left, cfg)
+            DaySurface(
+                spot_paths[i], iv_levels[i], var_left, cfg,
+                float(vrp[i]), float(vol_z[i]), float(signal_noise[i]),
+            )
             for i in range(n_days)
         ]

@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from .config import AccountConfig, CostModel, StrategyConfig
+from .filters import should_skip
 from .market import DaySurface
 
 __all__ = ["OpenSpread", "DayResult", "PathResult", "simulate_day", "simulate_path"]
@@ -223,6 +224,10 @@ def simulate_day(
             res.rolls += 1
 
     # --- entry ---------------------------------------------------------------
+    if should_skip(surface, entry, cfg.entry_filter):
+        res.exit_reason = "filtered"
+        return res
+
     size = cfg.contracts
     if account.scale_with_equity and account.start_equity > 0:
         size = max(1, int(round(size * equity / account.start_equity)))

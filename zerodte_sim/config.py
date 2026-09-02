@@ -5,7 +5,17 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-__all__ = ["CostModel", "StrategyConfig", "AccountConfig", "Side", "RollPolicy", "RollSide"]
+from .filters import FilterConfig
+
+__all__ = [
+    "CostModel",
+    "StrategyConfig",
+    "AccountConfig",
+    "FilterConfig",
+    "Side",
+    "RollPolicy",
+    "RollSide",
+]
 
 Side = Literal["put", "call", "both"]
 RollPolicy = Literal["none", "same_size", "martingale", "equal_risk"]
@@ -51,6 +61,9 @@ class StrategyConfig:
     width: float = 25.0
     contracts: int = 1
     strike_increment: float = 5.0
+
+    entry_filter: FilterConfig = field(default_factory=FilterConfig)
+    """Rule that declines the session outright, before any trade is placed."""
 
     # --- management --------------------------------------------------------
     profit_target: float | None = 0.50

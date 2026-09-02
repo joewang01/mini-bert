@@ -82,6 +82,34 @@ strategy worse. The columns that discriminate are the tail ones:
   several times the risk its margin suggests.
 - **`ruin%`** -- fraction of accounts that broke `ruin_frac` of starting equity.
 
+## Entry filters
+
+`filters.py` adds rules that decline a session outright, before any trade is
+placed -- the "skip the days that look dangerous" idea. Run the study with:
+
+```
+python -m zerodte_sim --filter-study --skip-rate 0.20 --paths 600
+```
+
+Three classes of signal, deliberately separated:
+
+- **Realisable** (`opening_move`, `opening_range`) read only the price path up
+  to entry. No free parameters, so whatever power they show is power the model
+  actually contains.
+- **Parameterised** (`rvol`) stands in for a relative-volume signal. Volume is
+  not modelled; the signal is a noisy observation of the day's realised vol
+  whose correlation *you* set. That correlation does all the work -- measure it
+  from your own data rather than assuming it, and sweep it.
+- **Oracles** (`oracle_vol`) read the day's realised vol directly. Untradeable;
+  they exist to bound what any volume-like signal could achieve.
+
+The comparison that matters is **filtered martingale against filtered
+disciplined rule**. A filter that works improves every policy, so measuring a
+filtered martingale against an unfiltered baseline credits the filter's gains
+to the roll rule. `filter_study.py` holds the filter fixed and varies only the
+response to a losing side; thresholds are calibrated on a separate sample so
+signals are compared at equal selectivity.
+
 ## Calibrating it to your own trading
 
 The defaults describe a 2-lot 10-delta 25-wide SPX put spread on $100k. Points
@@ -129,6 +157,8 @@ left tail than this simulator does.
 | `market.py` | variance clock, path generation, vol surface |
 | `config.py` | strategy, cost and account configuration |
 | `engine.py` | day loop, roll policies, path simulation |
+| `filters.py` | entry filters: realisable, parameterised and oracle signals |
+| `filter_study.py` | threshold calibration and the filtered-policy comparison |
 | `metrics.py` | tail-aware performance statistics |
 | `experiment.py` | common-random-number comparison harness |
 | `plots.py` | four-panel dashboard |
