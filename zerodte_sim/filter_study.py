@@ -92,12 +92,12 @@ def signal_power_sweep(
     days_per_path: int,
     seed: int,
     progress=None,
-) -> list[tuple[float, Summary, Summary]]:
+) -> list[tuple[float, list[Summary]]]:
     """How predictive must a volume-like signal be to matter?
 
-    Returns ``(corr, martingale summary, hard-stop summary)`` per correlation,
-    each at the same skip rate, so the answer is read as a gap between policies
-    rather than as an improvement over doing nothing.
+    Returns ``(corr, summaries)`` per correlation, with every policy measured at
+    the same skip rate on the same markets, so the answer is read as a gap
+    between policies rather than as an improvement over doing nothing.
     """
     rows = []
     for corr in correlations:
@@ -105,10 +105,5 @@ def signal_power_sweep(
         filt = replace(filt, threshold=calibrate_threshold(market, filt, entry_step, target_skip))
         cfg = replace(base, entry_filter=filt)
         exp = Experiment(market, costs, account, n_paths, days_per_path, seed)
-        variants = [
-            Variant("Martingale, same side", replace(cfg, roll_policy="martingale", roll_side="same")),
-            Variant("Hard stop, no roll", replace(cfg, roll_policy="none")),
-        ]
-        summaries = exp.summarise(exp.run(variants, progress=progress))
-        rows.append((corr, summaries[0], summaries[1]))
+        rows.append((corr, exp.summarise(exp.run(study_variants(cfg), progress=progress))))
     return rows

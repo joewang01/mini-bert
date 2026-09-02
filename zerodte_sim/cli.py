@@ -284,10 +284,13 @@ def _filter_study(market, costs, account, base, args, progress) -> None:
         market, costs, account, base, [0.0, 0.3, 0.6, 0.9, 1.0], skip,
         entry_step, max(80, args.paths // 3), args.days, args.seed, progress,
     )
-    print(f"{'corr':>6}{'martingale $/day':>20}{'worst day':>13}"
-          f"{'hard stop $/day':>19}{'worst day':>13}{'gap $/day':>13}")
-    print("-" * 84)
-    for corr, mart, stop in rows:
-        print(f"{corr:>6.2f}{mart.days.mean:>20,.2f}{mart.days.worst_day:>13,.0f}"
-              f"{stop.days.mean:>19,.2f}{stop.days.worst_day:>13,.0f}"
-              f"{mart.days.mean - stop.days.mean:>13,.2f}")
+    labels = [s.label for s in rows[0][1]]
+    header = f"{'corr':>6}" + "".join(f"{lab.split(',')[0]:>34}" for lab in labels)
+    print(header)
+    print(f"{'':>6}" + "".join(f"{'$/day':>12}{'worst day':>12}{'CVaR1%':>10}" for _ in labels))
+    print("-" * len(header))
+    for corr, summaries in rows:
+        line = f"{corr:>6.2f}"
+        for s in summaries:
+            line += f"{s.days.mean:>12,.2f}{s.days.worst_day:>12,.0f}{s.days.cvar_1:>10,.0f}"
+        print(line)
