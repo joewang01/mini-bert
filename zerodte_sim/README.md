@@ -162,7 +162,24 @@ worth re-pointing at your own numbers, roughly in order of how much they matter:
    `MarketConfig.mean_variance_ratio` after changing it -- because the multiplier
    is lognormal, raising `--vrp-sd` inflates mean realised variance even with the
    median pinned, and the mean is what decides whether the strategy earns
-   anything. Run it at `1.00` as a stress test.
+   anything. Note that `--vrp 1.00` is *not* the neutral case: it puts the mean
+   variance ratio at 1.454, which is strongly negative edge. True break-even is
+   `--vrp 0.825`.
+
+   **The go/no-go threshold.** Swept unfiltered over `--vrp` 0.70 to 1.00
+   (equal-risk rolling, 120-minute entry, 300 accounts x 252 sessions per
+   point), the strategy crosses zero at a **mean variance ratio of 0.913**,
+   equivalently a median realised/implied vol ratio of **0.787**. Below that it
+   earns; above it, no roll rule, filter or entry time in this study rescues it.
+   Break-even sits below 1.0 rather than at it because costs consume roughly
+   nine points of variance ratio before anything reaches you.
+
+   The slope is steep -- each 0.05 of `--vrp` is worth about $10/day, or 2.5% of
+   annual return -- so this is the one input worth measuring properly rather
+   than assuming. The threshold is specific to the default trade and slippage;
+   worse fills move it down. Because the model's left tail is optimistic
+   throughout, treat 0.913 as an upper bound to stay well clear of, not a target
+   to run up to.
 2. **`--half-spread`**. Measure your actual fills against the mid; do not guess.
    The `--sensitivity` sweep shows why.
 3. **`--contracts`**, **`--width`**, **`--delta`** -- your actual trade.
