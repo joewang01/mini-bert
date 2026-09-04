@@ -1,0 +1,73 @@
+{
+  "target_range": "3.50-3.75",
+  "meetings": [
+    "2026-09-16",
+    "2026-10-28",
+    "2026-12-09"
+  ],
+  "entries": [
+    {
+      "date": "2026-07-31",
+      "meeting": "2026-09-16",
+      "hike25": 67,
+      "hold": 33,
+      "cut25": 0,
+      "later": {},
+      "source": "CNBC 2026-08-07",
+      "driver": "Two days after the 9-3 hold; hawkish dissents"
+    },
+    {
+      "date": "2026-08-07",
+      "meeting": "2026-09-16",
+      "hike25": 44.4,
+      "hold": 55.6,
+      "cut25": 0,
+      "later": {},
+      "source": "CNBC 2026-08-07",
+      "driver": "July payrolls -23k vs +85k expected"
+    },
+    {
+      "date": "2026-08-25",
+      "meeting": "2026-09-16",
+      "hike25": 41.4,
+      "hold": 58.6,
+      "cut25": 0,
+      "later": {},
+      "source": "growbeansprout.com mirror",
+      "driver": "Soft retail sales, slowing inflation prints"
+    },
+    {
+      "date": "2026-08-31",
+      "meeting": "2026-09-16",
+      "hike25": 66,
+      "hold": 34,
+      "cut25": 0,
+      "later": {},
+      "source": "Forbes 2026-08-31",
+      "driver": "Warsh Jackson Hole: PCE 3.7% 12-mo, 4.1% 6-mo"
+    },
+    {
+      "date": "2026-09-03",
+      "meeting": "2026-09-16",
+      "hike25": 49,
+      "hold": 51,
+      "cut25": 0,
+      "later": {},
+      "source": "CNBC 2026-09-04 (prior-day comparison)",
+      "driver": "Pre-payrolls drift; Goldman 'too hawkish' note"
+    },
+    {
+      "date": "2026-09-04",
+      "meeting": "2026-09-16",
+      "hike25": 60,
+      "hold": 40,
+      "cut25": 0,
+      "later": {
+        "2026-10-28": null,
+        "2026-12-09": null
+      },
+      "source": "CNBC 2026-09-04, Forbes 2026-09-04",
+      "driver": "August payrolls +162k vs 53k consensus; 2-yr yield highest since Jan 2025"
+    }
+  ]
+}
