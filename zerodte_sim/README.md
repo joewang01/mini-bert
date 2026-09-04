@@ -188,6 +188,22 @@ Worth knowing before you lean on a number:
   drawdowns are, if anything, understated.
 - **A parametric surface**, not real option chains. Skew and the leverage effect
   are stylised, not fitted.
+- **Implied vol barely responds to realised range.** This one flatters every
+  filtered result in the study, so it deserves the most scrutiny.
+
+  `iv_level` moves with the session's cumulative *return* (the leverage effect)
+  but not with how far price has *travelled*. A morning that whipsaws violently
+  and ends flat leaves implied vol untouched here; on real tape it would have
+  visibly bid up 0DTE premium by noon.
+
+  The size of the gap is measurable. In a market calibrated to exactly zero
+  unconditional variance premium, an `opening_range` filter at 30% skipped still
+  earns, because it selects sessions whose realised-to-implied variance ratio is
+  0.77 while the ones it declines run 2.09. Implied vol at entry differs between
+  those two groups by only 5%. Fully neutralising that selection would take
+  roughly 64%. Reality sits somewhere between 5% and 64%, so **the filtered
+  numbers here are optimistic by an unknown but probably substantial margin**,
+  and the more selective the filter, the more optimistic they get.
 
 Every one of those omissions points the same way: the real thing has a fatter
 left tail than this simulator does.
