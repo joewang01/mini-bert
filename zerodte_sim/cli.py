@@ -258,6 +258,8 @@ def _filter_study(market, costs, account, base, args, progress) -> None:
     specs = [
         FilterSpec("no filter", FilterConfig()),
         spec("opening range (realisable)", kind="opening_range"),
+        spec("VWAP distance (realisable)", kind="vwap_distance"),
+        spec("VWAP stretch (realisable)", kind="vwap_stretch"),
         spec("rvol proxy, corr 0.60", kind="rvol", corr=0.60),
         spec("rvol proxy, corr 0.90", kind="rvol", corr=0.90),
         spec("perfect vol oracle", kind="oracle_vol"),

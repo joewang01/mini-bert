@@ -93,9 +93,23 @@ python -m zerodte_sim --filter-study --skip-rate 0.20 --paths 600
 
 Three classes of signal, deliberately separated:
 
-- **Realisable** (`opening_move`, `opening_range`) read only the price path up
-  to entry. No free parameters, so whatever power they show is power the model
-  actually contains.
+- **Realisable** (`opening_move`, `opening_range`, `vwap_distance`,
+  `vwap_stretch`) read only the price path up to entry. No free parameters, so
+  whatever power they show is power the model actually contains.
+
+  The VWAP pair targets a different failure mode: a volatility filter ranks days
+  by how *far* they travel, but the session that ruins a rolled book is one that
+  travels in a *straight line*. `vwap_stretch` is the mean **signed** gap from
+  the running volume-weighted average, so a round trip cancels and a trend does
+  not. Note that volume is not modelled -- the weights come from the variance
+  clock, which co-moves with volume but is not it.
+
+  In this model both VWAP signals are ~0.82-0.92 correlated with `opening_range`
+  and score slightly *worse* than it, so they add nothing here. They do behave
+  as designed (correlation with path directionality is 0.67 for `vwap_stretch`
+  against 0.51 for `opening_range`); the redundancy comes from this model's
+  fairly simple path shape -- drift plus noise plus one excursion. Real sessions
+  with multiple legs and consolidations may separate the two more.
 - **Parameterised** (`rvol`) stands in for a relative-volume signal. Volume is
   not modelled; the signal is a noisy observation of the day's realised vol
   whose correlation *you* set. That correlation does all the work -- measure it
