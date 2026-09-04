@@ -124,6 +124,35 @@ to the roll rule. `filter_study.py` holds the filter fixed and varies only the
 response to a losing side; thresholds are calibrated on a separate sample so
 signals are compared at equal selectivity.
 
+## Entry time
+
+```
+python -m zerodte_sim --entry-study --entry-minutes 15,30,60,90,120,180 --skip-rate 0.30
+```
+
+`entry_study.py` runs each entry time twice on identical markets, once unfiltered
+and once filtered, because a later entry changes two things at once: the filter
+sees more of the session, *and* the trade itself is different (less premium, less
+time to expiry, a tighter absolute stop on a smaller credit). The unfiltered row
+isolates the economics; the gap between rows is the filter's contribution at
+that hour.
+
+The result is the opposite of what signal correlations alone suggest. Signal
+power does roughly double between minute 15 and minute 120 -- but the filter's
+*dollar* contribution **falls** over the same range (hard stop: $18.60/day at
+minute 15 down to $10.69 at minute 120), because the unfiltered baseline
+improves so much on its own that less damage is left to prevent.
+
+The mechanism is exposure time, not information: the stop-out rate falls from
+28.1% to 21.9% as entry moves from minute 15 to 180, while credit falls only
+12%. A shorter window is simply a shorter window in which a 2:1 stop can fire.
+Worst day does not improve at any entry time, consistent with the tail being
+driven by gaps rather than by whipsaw.
+
+The martingale is the exception: it has an interior optimum near minute 60-90
+and degrades after, because a late roll runs into `min_credit` with too little
+premium left to recover anything.
+
 ## Calibrating it to your own trading
 
 The defaults describe a 2-lot 10-delta 25-wide SPX put spread on $100k. Points
@@ -173,6 +202,7 @@ left tail than this simulator does.
 | `engine.py` | day loop, roll policies, path simulation |
 | `filters.py` | entry filters: realisable, parameterised and oracle signals |
 | `filter_study.py` | threshold calibration and the filtered-policy comparison |
+| `entry_study.py` | separates a later entry's economics from the filter's gain |
 | `metrics.py` | tail-aware performance statistics |
 | `experiment.py` | common-random-number comparison harness |
 | `plots.py` | four-panel dashboard |

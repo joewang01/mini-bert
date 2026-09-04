@@ -47,6 +47,9 @@ class DayStats:
     mean_rolls: float
     roll_day_frac: float
     max_peak_contracts: int
+    mean_credit: float
+    """Average credit collected per traded session.  Falls with a later entry --
+    the economics of the trade change, not just the filter's information."""
     mean_peak_margin: float
     mean_total_risk: float
     """Average cumulative defined risk opened per day.  Diverges from
@@ -94,6 +97,7 @@ def summarise(label: str, paths: list, start_equity: float) -> Summary:
     peak_contracts = np.concatenate([p.peak_contracts for p in paths])
     peak_margin = np.concatenate([p.peak_margin for p in paths])
     total_risk = np.concatenate([p.total_risk for p in paths])
+    credit = np.concatenate([p.credit for p in paths])
 
 
     traded = np.concatenate([p.total_risk for p in paths]) > 0
@@ -128,6 +132,7 @@ def summarise(label: str, paths: list, start_equity: float) -> Summary:
         mean_rolls=float(rolls.mean()),
         roll_day_frac=float((rolls > 0).mean()),
         max_peak_contracts=int(peak_contracts.max()),
+        mean_credit=float(credit[traded].mean()) if traded.any() else 0.0,
         mean_peak_margin=float(peak_margin.mean()),
         mean_total_risk=float(total_risk.mean()),
     )

@@ -59,6 +59,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="test whether an entry filter rescues the martingale")
     r.add_argument("--skip-rate", type=float, default=0.20,
                    help="fraction of sessions an entry filter declines")
+    r.add_argument("--entry-study", action="store_true",
+                   help="separate the economics of a later entry from the filter's gain")
+    r.add_argument("--entry-minutes", default="15,30,60,90,120,180",
+                   help="comma-separated entry times for --entry-study")
+    r.add_argument("--entry-filter", default="opening_range",
+                   help="filter kind used by --entry-study")
     return p
 
 
@@ -160,6 +166,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.filter_study:
         _filter_study(market, costs, account, base, args, progress)
+
+    if args.entry_study:
+        _entry_study(market, costs, account, base, args, progress)
 
     if args.csv:
         with open(args.csv, "w", newline="") as fh:
@@ -296,3 +305,35 @@ def _filter_study(market, costs, account, base, args, progress) -> None:
         for s in summaries:
             line += f"{s.days.mean:>12,.2f}{s.days.worst_day:>12,.0f}{s.days.cvar_1:>10,.0f}"
         print(line)
+
+
+def _entry_study(market, costs, account, base, args, progress) -> None:
+    """Is a later entry worth it, and is the gain the filter or the trade?"""
+    from .entry_study import run_entry_study
+
+    minutes = [int(m) for m in args.entry_minutes.split(",")]
+    skip = args.skip_rate
+
+    print("\n" + "=" * 100)
+    print(f"Entry time study -- filter '{args.entry_filter}' declining {100*skip:.0f}% of sessions")
+    print("=" * 100)
+    print("'plain' enters at that time with no filter, so it isolates the economics of a later")
+    print("entry. 'filtered' adds the filter. 'gain' is what the filter buys at that hour.")
+
+    rows = run_entry_study(
+        market, costs, account, base, minutes, skip, args.entry_filter,
+        max(80, args.paths // 3), args.days, args.seed, progress,
+    )
+
+    labels = [s.label for s in rows[0].unfiltered]
+    for i, label in enumerate(labels):
+        print(f"\n  {label}")
+        print(f"    {'entry':>7}{'credit':>9}{'plain $/day':>14}{'filtered $/day':>16}"
+              f"{'gain':>9}{'filt med yr':>13}{'filt worst':>12}")
+        print("    " + "-" * 80)
+        for row in rows:
+            plain, gated = row.unfiltered[i], row.filtered[i]
+            print(f"    {row.minute:>5}m{plain.days.mean_credit:>9,.0f}"
+                  f"{plain.days.mean:>14,.2f}{gated.days.mean:>16,.2f}"
+                  f"{gated.days.mean - plain.days.mean:>9,.2f}"
+                  f"{100*gated.paths.median_return:>12.1f}%{gated.days.worst_day:>12,.0f}")

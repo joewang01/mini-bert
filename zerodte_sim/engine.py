@@ -85,6 +85,7 @@ class PathResult:
     peak_contracts: np.ndarray
     total_risk: np.ndarray
     peak_margin: np.ndarray
+    credit: np.ndarray
     max_adverse: np.ndarray
     exit_reasons: list[str]
     ruined: bool
@@ -304,6 +305,7 @@ def simulate_path(
     peak_contracts = np.zeros(n, dtype=int)
     total_risk = np.zeros(n)
     peak_margin = np.zeros(n)
+    credit = np.zeros(n)
     max_adverse = np.zeros(n)
     reasons: list[str] = []
     ruin_level = account.start_equity * account.ruin_frac
@@ -323,6 +325,7 @@ def simulate_path(
         peak_contracts[i] = day.peak_contracts
         total_risk[i] = day.total_risk_opened
         peak_margin[i] = day.peak_margin
+        credit[i] = day.credit_collected
         max_adverse[i] = day.max_adverse
         reasons.append(day.exit_reason)
         if equity[i + 1] <= ruin_level:
@@ -330,6 +333,6 @@ def simulate_path(
             ruin_day = i
 
     return PathResult(
-        pnl, equity, rolls, contracts, peak_contracts, total_risk, peak_margin, max_adverse,
+        pnl, equity, rolls, contracts, peak_contracts, total_risk, peak_margin, credit, max_adverse,
         reasons, ruined, ruin_day,
     )
