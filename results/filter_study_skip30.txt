@@ -1,0 +1,72 @@
+market: implied daily move 0.80%  E[RV]/IV variance ratio 0.897
+trade:  2x put 0.10-delta 25-wide, stop 2.0x credit, target 50%
+costs:  0.050/leg slippage, $1.00/contract/leg all-in
+
+policy                      $/day  win% med yr% p05 yr% worst day   CVaR1%  erase maxDD% ruin% risk/day
+-------------------------------------------------------------------------------------------------------
+Hard stop, no roll         -16.34  72.1    -3.9   -10.8    -4,454     -788     38    5.8   0.0    4,735
+No stop, hold to expiry     12.80  94.4     3.7   -12.4    -4,812   -4,540     40    8.5   0.0    4,735
+Re-enter, same size        -23.89  72.2    -5.6   -15.2    -5,216   -1,561     44    8.1   0.0    6,629
+Equal-risk roll            -24.00  72.2    -5.7   -14.6    -4,630   -1,388     39    7.9   0.0    6,000
+Martingale, same side      -38.19  91.1    -8.7   -27.4   -24,206   -3,938    227   13.9   0.2    9,173
+Martingale, both sides      -4.77  80.5    -0.8   -10.2    -7,368   -1,895     65    5.7   0.0    7,886
+
+'erase' = worst day divided by the average winning day.
+'risk/day' = mean cumulative defined risk opened per session.
+
+On the 42,211 sessions where a roll fired (27.9% of all sessions):
+  median outcome  no-roll $     -338   martingale $       36
+  mean outcome    no-roll $     -365   martingale $     -443
+  rolling rescued 79.4% of them, worsened 19.5%, worst case $-23,778
+
+============================================================================================
+Entry filters, each declining 30% of sessions, applied to every policy
+============================================================================================
+Thresholds calibrated on a separate sample. 'win%(t)' counts wins among *traded* days.
+
+  no filter
+    policy                    traded%    $/day  win%(t)  med yr%  p05 yr%  worst day    CVaR1%  maxDD%
+    --------------------------------------------------------------------------------------------------
+    Hard stop, no roll          100.0   -18.32     71.7     -4.5    -11.7     -4,454      -825     6.3
+    Equal-risk roll             100.0   -25.83     71.8     -5.9    -15.1     -4,122    -1,401     7.9
+    Martingale, same side       100.0   -38.36     91.0     -8.3    -26.6    -24,206    -3,912    13.5
+
+  opening range (realisable)
+    policy                    traded%    $/day  win%(t)  med yr%  p05 yr%  worst day    CVaR1%  maxDD%
+    --------------------------------------------------------------------------------------------------
+    Hard stop, no roll           70.3     0.28     75.4      0.3     -5.0     -4,454      -695     3.0
+    Equal-risk roll              70.3     1.69     75.6      0.4     -5.4     -4,122    -1,195     3.3
+    Martingale, same side        70.3    10.06     93.0      3.1     -8.5    -15,157    -2,925     5.0
+
+  rvol proxy, corr 0.60
+    policy                    traded%    $/day  win%(t)  med yr%  p05 yr%  worst day    CVaR1%  maxDD%
+    --------------------------------------------------------------------------------------------------
+    Hard stop, no roll           69.9    -1.26     75.0     -0.1     -5.9     -4,454      -711     3.0
+    Equal-risk roll              69.9     0.40     75.2      0.3     -6.4     -4,122    -1,199     3.5
+    Martingale, same side        69.9     9.50     93.1      3.2    -10.6     -7,399    -2,940     5.6
+
+  rvol proxy, corr 0.90
+    policy                    traded%    $/day  win%(t)  med yr%  p05 yr%  worst day    CVaR1%  maxDD%
+    --------------------------------------------------------------------------------------------------
+    Hard stop, no roll           69.9     4.39     76.6      1.3     -4.3     -4,454      -677     2.6
+    Equal-risk roll              69.9    11.19     76.7      2.9     -2.9     -4,122    -1,101     2.5
+    Martingale, same side        69.9    30.90     94.3      8.0     -1.1    -24,206    -2,557     3.5
+
+  perfect vol oracle
+    policy                    traded%    $/day  win%(t)  med yr%  p05 yr%  worst day    CVaR1%  maxDD%
+    --------------------------------------------------------------------------------------------------
+    Hard stop, no roll           69.7     5.98     77.0      1.5     -4.0     -4,454      -648     2.3
+    Equal-risk roll              69.7    14.71     77.1      3.9     -1.6     -4,122    -1,017     2.1
+    Martingale, same side        69.7    39.78     94.7     10.7      2.4    -24,206    -2,312     2.5
+
+============================================================================================
+How predictive must a volume signal be? (all at 30% skipped)
+============================================================================================
+  corr                         Hard stop                   Equal-risk roll                        Martingale
+             $/day   worst day    CVaR1%       $/day   worst day    CVaR1%       $/day   worst day    CVaR1%
+------------------------------------------------------------------------------------------------------------
+  0.00      -13.36      -4,454      -753      -19.04      -4,122    -1,322      -29.37     -15,157    -3,621
+  0.30       -7.07      -4,454      -744       -8.81      -4,122    -1,272       -8.80      -9,340    -3,313
+  0.60       -1.26      -4,454      -711        0.40      -4,122    -1,199        9.50      -7,399    -2,940
+  0.90        4.39      -4,454      -677       11.19      -4,122    -1,101       30.90     -24,206    -2,557
+  1.00        5.98      -4,454      -648       14.71      -4,122    -1,017       39.78     -24,206    -2,312
